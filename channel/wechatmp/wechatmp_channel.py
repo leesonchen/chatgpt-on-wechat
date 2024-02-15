@@ -101,6 +101,7 @@ class WechatMPChannel(ChatChannel):
             logger.error("[wechatmp] file {} delete failed: {}".format(path, e))
 
     def send(self, reply: Reply, context: Context):
+        context['wait_for_reply'] = False
         receiver = context["receiver"]
         if self.passive_reply:
             if reply.type == ReplyType.TEXT or reply.type == ReplyType.INFO or reply.type == ReplyType.ERROR:
@@ -285,8 +286,6 @@ class WechatMPChannel(ChatChannel):
                     return
                 self.client.message.send_image(receiver, response["media_id"])
                 logger.info("[wechatmp] Do send image to {}".format(receiver))
-
-            context['wait_for_reply'] = False
         return
 
     def _success_callback(self, session_id, context, **kwargs):  # 线程异常结束时的回调函数
