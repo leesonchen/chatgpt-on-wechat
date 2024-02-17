@@ -199,7 +199,6 @@ class WechatMPChannel(ChatChannel):
 
                     # if send file rather than voice
                     if send_voice_as_file:
-                        import requests
                         upload_url = conf().get('file_upload_url', '')  # 替换为你的Web服务器上传URL
                         if not upload_url:
                             logger.error("[wechatmp] file_upload_url is empty")
