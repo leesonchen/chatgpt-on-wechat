@@ -28,6 +28,7 @@ class OpenAIBot(Bot, OpenAIImage):
         if proxy:
             openai.proxy = proxy
 
+        logger.info("[OPEN_AI] api_key={}, api_base={}, proxy={}".format(openai.api_key, openai.api_base, proxy))
         self.sessions = SessionManager(OpenAISession, model=conf().get("model") or "text-davinci-003")
         self.args = {
             "model": conf().get("model") or "text-davinci-003",  # 对话模型的名称
@@ -83,6 +84,7 @@ class OpenAIBot(Bot, OpenAIImage):
 
     def reply_text(self, session: OpenAISession, retry_count=0):
         try:
+            logger.info("[OPEN_AI] args={}".format(**self.args))
             response = openai.Completion.create(prompt=str(session), **self.args)
             res_content = response.choices[0]["text"].strip().replace("<|endoftext|>", "")
             total_tokens = response["usage"]["total_tokens"]

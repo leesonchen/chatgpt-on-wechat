@@ -63,7 +63,7 @@ class ChatGPTBot(Bot, OpenAIImage):
             if reply:
                 return reply
             session = self.sessions.session_query(query, session_id)
-            logger.debug("[CHATGPT] session query={}".format(session.messages))
+            logger.info("[CHATGPT] session query={}".format(session.messages))
 
             api_key = context.get("openai_api_key")
             model = context.get("gpt_model")
@@ -76,7 +76,7 @@ class ChatGPTBot(Bot, OpenAIImage):
             #     return self.reply_text_stream(query, new_query, session_id)
 
             reply_content = self.reply_text(session, api_key, args=new_args)
-            logger.debug(
+            logger.info(
                 "[CHATGPT] new_query={}, session_id={}, reply_cont={}, completion_tokens={}".format(
                     session.messages,
                     session_id,
@@ -173,6 +173,7 @@ class AzureChatGPTBot(ChatGPTBot):
     def create_img(self, query, retry_count=0, api_key=None):
         api_version = "2022-08-03-preview"
         url = "{}dalle/text-to-image?api-version={}".format(openai.api_base, api_version)
+        logger.info("AzureChatGPTBot create image url: {}".format(url))
         api_key = api_key or openai.api_key
         headers = {"api-key": api_key, "Content-Type": "application/json"}
         try:

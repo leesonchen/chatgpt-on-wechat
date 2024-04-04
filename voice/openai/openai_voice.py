@@ -18,14 +18,17 @@ class OpenaiVoice(Voice):
         openai.api_key = conf().get("open_ai_api_key")
 
     def voiceToText(self, voice_file):
-        logger.debug("[Openai] voice file name={}".format(voice_file))
+        logger.info("[Openai] voice file name={}".format(voice_file))
         try:
             file = open(voice_file, "rb")
+            logger.info("[Openai] voice file opened")
             result = openai.Audio.transcribe("whisper-1", file)
+            logger.info("[Openai] voiceToText result={}".format(result))
             text = result["text"]
             reply = Reply(ReplyType.TEXT, text)
             logger.info("[Openai] voiceToText text={} voice file name={}".format(text, voice_file))
         except Exception as e:
+            logger.error(e)
             reply = Reply(ReplyType.ERROR, "我暂时还无法听清您的语音，请稍后再试吧~")
         finally:
             return reply

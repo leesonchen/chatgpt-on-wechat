@@ -47,6 +47,8 @@ class Bridge(object):
         self.chat_bots = {}
 
     def get_bot(self, typename):
+        logger.info("get bot {} for {}".format(self.btype[typename], typename))
+
         if self.bots.get(typename) is None:
             logger.info("create bot {} for {}".format(self.btype[typename], typename))
             if typename == "text_to_voice":
@@ -66,6 +68,7 @@ class Bridge(object):
         return self.get_bot("chat").reply(query, context)
 
     def fetch_voice_to_text(self, voiceFile) -> Reply:
+        logger.info("voice_to_text: {}".format(voiceFile))
         return self.get_bot("voice_to_text").voiceToText(voiceFile)
 
     def fetch_text_to_voice(self, text) -> Reply:
@@ -78,6 +81,18 @@ class Bridge(object):
         if self.chat_bots.get(bot_type) is None:
             self.chat_bots[bot_type] = create_bot(bot_type)
         return self.chat_bots.get(bot_type)
+
+    def set_linkAI_chat_bot(self):
+        self.btype["chat"] = const.LINKAI
+        self.bots["chat"] = create_bot(const.LINKAI)
+        typename = "chat"
+        logger.info("set bot {} for {}".format(self.btype[typename], typename))
+
+    def set_gpt_chat_bot(self):
+        self.btype["chat"] = const.CHATGPT
+        self.bots["chat"] = create_bot(const.CHATGPT)
+        typename = "chat"
+        logger.info("set bot {} for {}".format(self.btype[typename], typename))
 
     def reset_bot(self):
         """

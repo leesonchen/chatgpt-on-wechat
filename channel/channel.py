@@ -42,3 +42,9 @@ class Channel(object):
 
     def build_text_to_voice(self, text) -> Reply:
         return Bridge().fetch_text_to_voice(text)
+
+    def set_linkAI_chat_bot(self):
+        Bridge().set_linkAI_chat_bot()
+
+    def set_gpt_chat_bot(self):
+        Bridge().set_gpt_chat_bot()
