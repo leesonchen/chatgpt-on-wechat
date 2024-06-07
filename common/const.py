@@ -16,6 +16,8 @@ QWEN_MAX = "qwen-max"
 
 GEMINI = "gemini"
 ZHIPU_AI = "glm-4"
+ZHIPU_AI_FLASH = "glm-4-flash"
+
 MOONSHOT = "moonshot"
 
 
@@ -35,4 +37,4 @@ MODEL_LIST = ["gpt-3.5-turbo", "gpt-3.5-turbo-16k", "gpt-4", "wenxin", "wenxin-4
 
 # channel
 FEISHU = "feishu"
-DINGTALK = "dingtalk"   
+DINGTALK = "dingtalk"

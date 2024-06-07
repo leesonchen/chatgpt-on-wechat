@@ -47,7 +47,7 @@ class ZHIPUAIBot(Bot, ZhipuAIImage):
             if reply:
                 return reply
             session = self.sessions.session_query(query, session_id)
-            logger.debug("[ZHIPU_AI] session query={}".format(session.messages))
+            logger.info("[ZHIPU_AI] session query={}".format(session.messages))
 
             api_key = context.get("openai_api_key") or openai.api_key
             model = context.get("gpt_model")
@@ -60,7 +60,7 @@ class ZHIPUAIBot(Bot, ZhipuAIImage):
             #     return self.reply_text_stream(query, new_query, session_id)
 
             reply_content = self.reply_text(session, api_key, args=new_args)
-            logger.debug(
+            logger.info(
                 "[ZHIPU_AI] new_query={}, session_id={}, reply_cont={}, completion_tokens={}".format(
                     session.messages,
                     session_id,

@@ -11,6 +11,7 @@ class Session(object):
             self.system_prompt = conf().get("character_desc", "")
         else:
             self.system_prompt = system_prompt
+        logger.info("[Session] system_prompt={}".format(self.system_prompt))
 
     # 重置会话
     def reset(self):
