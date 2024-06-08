@@ -55,8 +55,9 @@ available_setting = {
     # 人格描述
     "character_desc": "你是ChatGPT, 一个由OpenAI训练的大型语言模型, 你旨在回答并解决人们的任何问题，并且可以使用多种语言与人交流。",
     "conversation_max_tokens": 1000,  # 支持上下文记忆的最多字符数
+    # 避免用户过长时间等待的响应（公众号）
     "wait_timeout": 20, # 相应用户等待的超时时间
-    "wait_timeout_reply": "思考中，请稍候...", # 超时后的回复
+    "wait_timeout_reply": "思考中，请稍候...", # 超时后的回复    
     # chatgpt限流配置
     "rate_limit_chatgpt": 20,  # chatgpt的调用频率限制
     "rate_limit_dalle": 50,  # openai dalle的调用频率限制
@@ -98,15 +99,10 @@ available_setting = {
     "voice_reply_voice": False,  # 是否使用语音回复语音，需要设置对应语音合成引擎的api key
     "always_reply_voice": False,  # 是否一直使用语音回复
     "text_after_voice": False,  # 是否语音回复后增加文本回复
-    "voice_as_file": False,  # 是否直接发送语音文件而不是语音
     "voice_to_text": "openai",  # 语音识别引擎，支持openai,baidu,google,azure
     "text_to_voice": "openai",  # 语音合成引擎，支持openai,baidu,google,pytts(offline),azure,elevenlabs,edge(online)
     "text_to_voice_model": "tts-1",
     "tts_voice_id": "alloy",
-    "file_upload_url": "",  # 上传文件服务链接
-    "file_upload_token": "",   # 上传文件服务token
-    "file_web_server": "",
-    "file_upload_auth_tokens": [],
     # baidu 语音api配置， 使用百度语音识别和语音合成时需要
     "baidu_app_id": "",
     "baidu_api_key": "",

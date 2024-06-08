@@ -2,7 +2,6 @@
 import asyncio
 import imghdr
 import io
-import json
 import os
 import threading
 import time
@@ -39,7 +38,6 @@ class WechatMPChannel(ChatChannel):
         self.passive_reply = passive_reply
         self.NOT_SUPPORT_REPLYTYPE = []
         self.text_after_voice = conf().get("text_after_voice", False)
-        self.voice_as_file = conf().get("voice_as_file", False)
         appid = conf().get("wechatmp_app_id")
         secret = conf().get("wechatmp_app_secret")
         token = conf().get("wechatmp_token")
@@ -60,12 +58,6 @@ class WechatMPChannel(ChatChannel):
             t = threading.Thread(target=self.start_loop, args=(self.delete_media_loop,))
             t.setDaemon(True)
             t.start()
-        else:
-            thumb_path = 'voice_pic.png'
-            thumb_type = 'image/png'
-            # self.voice_thumb_id = self.client.media.upload("thumb", (thumb_path, open(thumb_path, "rb"), thumb_type))["thumb_media_id"]
-            self.voice_thumb_id = self.client.material.add("image", (thumb_path, open(thumb_path, "rb"), thumb_type))["media_id"]
-            logger.info("[wechatmp] thumb uploaded, thumb_id={}".format(self.voice_thumb_id))
 
     def startup(self):
         if self.passive_reply:
@@ -85,20 +77,6 @@ class WechatMPChannel(ChatChannel):
         await asyncio.sleep(10)
         self.client.material.delete(media_id)
         logger.info("[wechatmp] permanent media {} has been deleted".format(media_id))
-
-    def delete_file(self, path, wait_seconds=10):
-        import threading
-        thread = threading.Thread(target=self._delete_file, args=(path, wait_seconds))
-        thread.start()
-
-    def _delete_file(self, path, wait_seconds):
-        logger.debug("[wechatmp] file {} will be deleted in 10s".format(path))
-        time.sleep(wait_seconds)
-        try:
-            os.remove(path)
-            logger.info("[wechatmp] file {} has been deleted".format(path))
-        except Exception as e:
-            logger.error("[wechatmp] file {} delete failed: {}".format(path, e))
 
     def send(self, reply: Reply, context: Context):
         context['wait_for_reply'] = False
@@ -212,11 +190,8 @@ class WechatMPChannel(ChatChannel):
                         time.sleep(0.5)  # 休眠0.5秒，防止发送过快乱序
                 logger.info("[wechatmp] Do send text to {}: {}".format(receiver, reply_text))
             elif reply.type == ReplyType.VOICE:
-                send_voice_as_file = self.voice_as_file
                 try:
                     file_path = reply.content
-                    self.delete_file(file_path, 60)
-
                     file_name = os.path.basename(file_path)
                     file_type = os.path.splitext(file_name)[1]
                     if file_type == ".mp3":
@@ -229,64 +204,34 @@ class WechatMPChannel(ChatChannel):
                         file_path = mp3_file
                         file_name = os.path.basename(file_path)
                         file_type = "audio/mpeg"
-                        self.delete_file(file_path, 60)
-
                     logger.info("[wechatmp] file_name: {}, file_type: {} ".format(file_name, file_type))
-
-                    # if send file rather than voice
-                    if send_voice_as_file:
-                        upload_url = conf().get('file_upload_url', '')  # 替换为你的Web服务器上传URL
-                        if not upload_url:
-                            logger.error("[wechatmp] file_upload_url is empty")
-                            send_voice_as_file = False
-                        else:
-                            upload_token = conf().get('file_upload_token', '')
-                            files = {'file': open(file_path, 'rb')}
-                            data = {'token': upload_token}
-
-                            response = requests.post(upload_url, data=data, files=files)
-                            if response.status_code != 200:
-                                logger.error("[wechatmp] file upload failed, status_code: {}; error: {}".format(response.status_code, response.text))
-                                send_voice_as_file = False
-                            else:
-                                result = json.loads(response.text)
-                                logger.info("[wechatmp] file upload result: {}; response={}".format(result, response.text))
-
-                                download_url = result['download_url']
-                                expire_seconds = result['expires']  # 文件有效期
-                                expire_minute = int(expire_seconds / 60)
-                                logger.info(f"文件下载链接：{download_url}")
-                                self.client.message.send_music(receiver, download_url, download_url, self.voice_thumb_id, \
-                                                               '语音消息', f'[有效期{expire_minute}分钟请尽快收听]')
-                    if not send_voice_as_file:
-                        media_ids = []
-                        duration, files = split_audio(file_path, 60 * 1000)
-                        if len(files) > 1:
-                            logger.info("[wechatmp] voice too long {}s > 60s , split into {} parts".format(duration / 1000.0, len(files)))
-
-                        for path in files:
-                            # support: <2M, <60s, AMR\MP3
-                            response = self.client.media.upload("voice", (os.path.basename(path), open(path, "rb"), file_type))
-                            logger.debug("[wechatcom] upload voice response: {}".format(response))
-                            media_ids.append(response["media_id"])
-                            if len(files) > 1:
-                                self.delete_file(path)
-
-                        for media_id in media_ids:
-                            self.client.message.send_voice(receiver, media_id)
-                            time.sleep(1)
-
+                    media_ids = []
+                    duration, files = split_audio(file_path, 60 * 1000)
+                    if len(files) > 1:
+                        logger.info("[wechatmp] voice too long {}s > 60s , split into {} parts".format(duration / 1000.0, len(files)))
+                    for path in files:
+                        # support: <2M, <60s, AMR\MP3
+                        response = self.client.media.upload("voice", (os.path.basename(path), open(path, "rb"), file_type))
+                        logger.debug("[wechatcom] upload voice response: {}".format(response))
+                        media_ids.append(response["media_id"])
+                        os.remove(path)
                 except WeChatClientException as e:
                     logger.error("[wechatmp] upload voice failed: {}".format(e))
                     return
-                except Exception as e:
-                    logger.error("[wechatmp] send voice failed: {}".format(e))
-                    return
 
+                try:
+                    os.remove(file_path)
+                except Exception:
+                    pass
+
+                for media_id in media_ids:
+                    self.client.message.send_voice(receiver, media_id)
+                    time.sleep(1)
                 logger.info("[wechatmp] Do send voice to {}".format(receiver))
 
                 # if need text_after_voice
                 if self.text_after_voice and reply.orig_content:
+                    logger.debug("[wechatmp] send text after voice: {}".format(reply.orig_content))
                     self.client.message.send_text(receiver, reply.orig_content)
 
             elif reply.type == ReplyType.IMAGE_URL:  # 从网络下载图片
