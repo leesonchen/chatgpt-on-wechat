@@ -34,7 +34,7 @@ class Bridge(object):
             self.btype["chat"] = const.QWEN_DASHSCOPE
         if model_type in [const.GEMINI]:
             self.btype["chat"] = const.GEMINI
-        if model_type in [const.ZHIPU_AI]:
+        if model_type in [const.ZHIPU_AI,const.ZHIPU_AI_FLASH]:
             self.btype["chat"] = const.ZHIPU_AI
         if model_type and model_type.startswith("claude-3"):
             self.btype["chat"] = const.CLAUDEAPI
@@ -88,6 +88,18 @@ class Bridge(object):
         if self.chat_bots.get(bot_type) is None:
             self.chat_bots[bot_type] = create_bot(bot_type)
         return self.chat_bots.get(bot_type)
+
+    def set_linkAI_chat_bot(self):
+        self.btype["chat"] = const.LINKAI
+        self.bots["chat"] = create_bot(const.LINKAI)
+        typename = "chat"
+        logger.info("set bot {} for {}".format(self.btype[typename], typename))
+
+    def set_gpt_chat_bot(self):
+        self.btype["chat"] = const.CHATGPT
+        self.bots["chat"] = create_bot(const.CHATGPT)
+        typename = "chat"
+        logger.info("set bot {} for {}".format(self.btype[typename], typename))
 
     def reset_bot(self):
         """

@@ -22,6 +22,7 @@ from common.singleton import singleton
 from common.utils import split_string_by_utf8_length
 from config import conf
 from voice.audio_convert import any_to_mp3, split_audio
+import base64
 
 # If using SSL, uncomment the following lines, and modify the certificate path.
 # from cheroot.server import HTTPServer
@@ -236,11 +237,17 @@ class WechatMPChannel(ChatChannel):
 
             elif reply.type == ReplyType.IMAGE_URL:  # 从网络下载图片
                 img_url = reply.content
-                pic_res = requests.get(img_url, stream=True)
-                image_storage = io.BytesIO()
-                for block in pic_res.iter_content(1024):
-                    image_storage.write(block)
-                image_storage.seek(0)
+
+                # open_ai接口
+                # pic_res = requests.get(img_url, stream=True)
+                # image_storage = io.BytesIO()
+                # for block in pic_res.iter_content(1024):
+                #     image_storage.write(block)
+                # image_storage.seek(0)
+
+                # sd接口
+                image_storage = io.BytesIO(base64.b64decode(img_url))
+
                 image_type = imghdr.what(image_storage)
                 filename = receiver + "-" + str(context["msg"].msg_id) + "." + image_type
                 content_type = "image/" + image_type
