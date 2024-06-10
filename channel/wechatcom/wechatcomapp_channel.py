@@ -21,9 +21,6 @@ from common.utils import compress_imgfile, fsize, split_string_by_utf8_length
 from config import conf, subscribe_msg
 from voice.audio_convert import any_to_amr, split_audio
 
-import json
-import xml.etree.ElementTree as ET
-
 MAX_UTF8_LEN = 2048
 
 
