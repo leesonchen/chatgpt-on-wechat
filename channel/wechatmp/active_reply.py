@@ -53,10 +53,11 @@ class Query:
                 message_id = wechatmp_msg.msg_id
 
                 logger.info(
-                    "[wechatmp] {}:{} Receive post query {} {}: {}".format(
+                    "[wechatmp] {}:{} Receive post query {}->{}: {}-{}".format(
                         web.ctx.env.get("REMOTE_ADDR"),
                         web.ctx.env.get("REMOTE_PORT"),
                         from_user,
+                        wechatmp_msg.to_user_id,
                         message_id,
                         content,
                     )

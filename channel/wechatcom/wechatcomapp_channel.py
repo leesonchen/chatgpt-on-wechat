@@ -21,6 +21,11 @@ from common.utils import compress_imgfile, fsize, split_string_by_utf8_length, c
 from config import conf, subscribe_msg
 from voice.audio_convert import any_to_amr, split_audio
 
+from wechatpy import events
+from wechatpy.fields import IntegerField, StringField
+import xmltodict
+from wechatpy.utils import to_text
+
 MAX_UTF8_LEN = 2048
 
 
@@ -223,6 +228,20 @@ class WechatComAppChannel(ChatChannel):
             return response_data["msg_list"][-1]  # 返回最新的一条消息
         else:
             return None
+
+# 扩展客服消息事件类
+class CustomServiceEvent(events.BaseEvent):
+    """
+    客服消息或事件
+    """
+    agent = IntegerField('AgentID', 0)
+    event = 'kf_msg_or_event'
+    source = StringField('FromUserName')
+    target = StringField('ToUserName')
+    time = IntegerField('CreateTime')
+    token = StringField('Token')
+    open_kfid = StringField('OpenKfId')
+
 class Query:
     def GET(self):
         channel = WechatComAppChannel()
@@ -248,7 +267,7 @@ class Query:
             timestamp = params.timestamp
             nonce = params.nonce
             message = channel.crypto.decrypt_message(web.data(), signature, timestamp, nonce)
-            msg = parse_message(message)
+            msg = self.extended_parse_message(message)
             logger.debug("[wechatcom] receive message: {}, msg= {}".format(message, msg))
 
         except (InvalidSignatureException, InvalidCorpIdException):
@@ -257,12 +276,11 @@ class Query:
         kf_msg = None
         if msg.type == "event":
             if msg.event == "subscribe":
-                pass
-                # reply_content = subscribe_msg()
-                # if reply_content:
-                #     reply = create_reply(reply_content, msg).render()
-                #     res = channel.crypto.encrypt_message(reply, nonce, timestamp)
-                #     return res
+                reply_content = subscribe_msg()
+                if reply_content:
+                    reply = create_reply(reply_content, msg).render()
+                    res = channel.crypto.encrypt_message(reply, nonce, timestamp)
+                    return res
             elif msg.event == "kf_msg_or_event":
                 kf_msg = channel.get_latest_message(msg.token, msg.open_kfid)
                 logger.debug("[wechatcom] latest_message: {}".format(msg))
@@ -285,3 +303,20 @@ class Query:
             context.kf_mode = kf_msg is not None    #是否客服模式
             channel.produce(context)
         return "success"
+
+
+    # 扩展解析消息
+    def extended_parse_message(self, message):
+        msg = parse_message(message)
+        if msg.type != "unknown":
+            return msg
+
+        # 尝试解析客服消息事件
+        msg_text = xmltodict.parse(to_text(message))['xml']
+        message_type = msg_text['MsgType'].lower()
+        if message_type == 'event':
+            event_type = msg_text['Event'].lower()
+            if event_type == "kf_msg_or_event":
+                return CustomServiceEvent(msg_text)
+
+        return msg

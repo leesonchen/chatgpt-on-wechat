@@ -99,6 +99,18 @@ class Bridge(object):
             self.chat_bots[bot_type] = create_bot(bot_type)
         return self.chat_bots.get(bot_type)
 
+    def set_linkAI_chat_bot(self):
+        self.btype["chat"] = const.LINKAI
+        self.bots["chat"] = create_bot(const.LINKAI)
+        typename = "chat"
+        logger.info("set bot {} for {}".format(self.btype[typename], typename))
+
+    def set_gpt_chat_bot(self):
+        self.btype["chat"] = const.CHATGPT
+        self.bots["chat"] = create_bot(const.CHATGPT)
+        typename = "chat"
+        logger.info("set bot {} for {}".format(self.btype[typename], typename))
+
     def reset_bot(self):
         """
         重置bot路由

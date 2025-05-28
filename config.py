@@ -59,7 +59,7 @@ available_setting = {
     "conversation_max_tokens": 1000,  # 支持上下文记忆的最多字符数
     # 避免用户过长时间等待的响应（公众号）
     "wait_timeout": 20, # 相应用户等待的超时时间
-    "wait_timeout_reply": "思考中，请稍候...", # 超时后的回复
+    "wait_timeout_reply": "思考中，请稍候...", # 超时后的回复    
     # chatgpt限流配置
     "rate_limit_chatgpt": 20,  # chatgpt的调用频率限制
     "rate_limit_dalle": 50,  # openai dalle的调用频率限制

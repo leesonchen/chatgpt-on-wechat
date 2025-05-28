@@ -22,6 +22,7 @@ from common.singleton import singleton
 from common.utils import split_string_by_utf8_length, remove_markdown_symbol
 from config import conf
 from voice.audio_convert import any_to_mp3, split_audio
+import base64
 
 # If using SSL, uncomment the following lines, and modify the certificate path.
 # from cheroot.server import HTTPServer
@@ -30,7 +31,10 @@ from voice.audio_convert import any_to_mp3, split_audio
 #         certificate='/ssl/cert.pem',
 #         private_key='/ssl/cert.key')
 
-
+class BackendMessage:
+    def __init__(self, receiver, content):
+        self.receiver = receiver
+        self.content = content
 @singleton
 class WechatMPChannel(ChatChannel):
     def __init__(self, passive_reply=True):
@@ -58,6 +62,12 @@ class WechatMPChannel(ChatChannel):
             t = threading.Thread(target=self.start_loop, args=(self.delete_media_loop,))
             t.setDaemon(True)
             t.start()
+        self.backend_task_loop = asyncio.new_event_loop()
+        self.message_queue = asyncio.Queue(maxsize=1000)
+        t = threading.Thread(target=self.start_loop, args=(self.backend_task_loop,))
+        t.setDaemon(True)
+        t.start()
+        asyncio.run_coroutine_threadsafe(self.handle_message(), self.backend_task_loop)
 
     def startup(self):
         if self.passive_reply:
@@ -185,7 +195,7 @@ class WechatMPChannel(ChatChannel):
                 if len(texts) > 1:
                     logger.info("[wechatmp] text too long, split into {} parts".format(len(texts)))
                 for i, text in enumerate(texts):
-                    self.client.message.send_text(receiver, text)
+                    self.send_text_message(receiver, text)
                     if i != len(texts) - 1:
                         time.sleep(0.5)  # 休眠0.5秒，防止发送过快乱序
                 logger.info("[wechatmp] Do send text to {}: {}".format(receiver, reply_text))
@@ -236,11 +246,17 @@ class WechatMPChannel(ChatChannel):
 
             elif reply.type == ReplyType.IMAGE_URL:  # 从网络下载图片
                 img_url = reply.content
-                pic_res = requests.get(img_url, stream=True)
-                image_storage = io.BytesIO()
-                for block in pic_res.iter_content(1024):
-                    image_storage.write(block)
-                image_storage.seek(0)
+
+                # open_ai接口
+                # pic_res = requests.get(img_url, stream=True)
+                # image_storage = io.BytesIO()
+                # for block in pic_res.iter_content(1024):
+                #     image_storage.write(block)
+                # image_storage.seek(0)
+
+                # sd接口
+                image_storage = io.BytesIO(base64.b64decode(img_url))
+
                 image_type = imghdr.what(image_storage)
                 filename = receiver + "-" + str(context["msg"].msg_id) + "." + image_type
                 content_type = "image/" + image_type
@@ -299,6 +315,24 @@ class WechatMPChannel(ChatChannel):
                 self.client.message.send_video(receiver, response["media_id"])
                 logger.info("[wechatmp] Do send video to {}".format(receiver))
         return
+
+    async def put_message(self, msg : BackendMessage):
+        logger.debug("[wechatmp] before put message, queue size: {}".format(self.message_queue.qsize()))
+        await asyncio.sleep(600)
+        await self.message_queue.put(msg)
+        logger.debug("[wechatmp] after put message, queue size: {}".format(self.message_queue.qsize()))
+
+    async def handle_message(self):
+        logger.debug("[wechatmp] handle_message started.")
+        while True:
+            logger.debug("[wechatmp] handle_message running")
+            msg = await self.message_queue.get()
+            logger.debug("[wechatmp] handle message: {}, content: {}, receiver: {} ".format(msg, msg.content, msg.receiver))
+            # self.client.message.send_text(msg.receiver, msg.content)
+
+    def send_text_message(self, receiver, content):
+        asyncio.run_coroutine_threadsafe(self.put_message(BackendMessage(receiver, "[重播]" + content)), self.backend_task_loop)
+        return self.client.message.send_text(receiver, content)
 
     def _success_callback(self, session_id, context, **kwargs):  # 线程异常结束时的回调函数
         logger.debug("[wechatmp] Success to generate reply, msgId={}".format(context["msg"].msg_id))
