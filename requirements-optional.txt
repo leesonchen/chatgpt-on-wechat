@@ -44,3 +44,6 @@ zhipuai>=2.0.1
 
 # tongyi qwen new sdk
 dashscope
+
+# tencentcloud sdk
+tencentcloud-sdk-python>=3.0.0
