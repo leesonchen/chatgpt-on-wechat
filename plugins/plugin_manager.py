@@ -35,7 +35,8 @@ class PluginManager:
             plugincls.namecn = kwargs.get("namecn") if kwargs.get("namecn") != None else name
             plugincls.hidden = kwargs.get("hidden") if kwargs.get("hidden") != None else False
             plugincls.enabled = True
-            if self.current_plugin_path == None:
+            # 检查是否已经设置了path属性，如果已设置则跳过path检查
+            if self.current_plugin_path == None and not hasattr(plugincls, 'path'):
                 raise Exception("Plugin path not set")
             self.plugins[name.upper()] = plugincls
             logger.info("Plugin %s_v%s registered, path=%s" % (name, plugincls.version, plugincls.path))
