@@ -1,0 +1,11 @@
+{
+    "enabled": true,
+    "database_path": "data/aspiration.db",
+    "reminder_time": "21:00",
+    "max_goals_per_user": 1,
+    "ai_enabled": true,
+    "debug_mode": false,
+    "timezone": "Asia/Shanghai",
+    "max_check_days": 1000,
+    "default_goal_days": 30
+}

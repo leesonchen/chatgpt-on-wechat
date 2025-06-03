@@ -1,0 +1,8 @@
+{
+    "database_file": "aspiration.db",
+    "reminder_time": "21:00",
+    "enable_reminders": true,
+    "ai_model": "default",
+    "max_active_goals": 1,
+    "default_goal_days": 21
+}

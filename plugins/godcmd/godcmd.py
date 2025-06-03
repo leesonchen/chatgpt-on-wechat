@@ -451,6 +451,7 @@ class Godcmd(Plugin):
             return False, "请提供口令"
 
         password = args[0]
+        # print(password, self.password, self.temp_password)
         if password == self.password:
             self.admin_users.append(userid)
             global_config["admin_users"].append(userid)
