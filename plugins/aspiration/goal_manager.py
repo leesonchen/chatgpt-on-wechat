@@ -51,21 +51,23 @@ class GoalManager:
         """
         self.db = db_manager
 
-    def create_goal(self, user_id: str, description: str, planned_days: int) -> Tuple[bool, str]:
+    def create_goal(self, user_id: str, description: str, planned_days: int, ai_generator=None) -> Tuple[bool, str]:
         """
         创建新目标
 
         为指定用户创建一个新的目标。在创建前会进行多项验证，包括检查是否已有活跃目标、
         验证输入参数的合法性等。确保每个用户同时只能有一个活跃目标。
+        新增AI检查功能，对目标内容进行适宜性评估和优化建议。
 
         Args:
             user_id: 用户ID
             description: 目标描述，会自动去除首尾空白字符
             planned_days: 计划坚持的天数，必须在1-1000之间
+            ai_generator: AI回复生成器实例，用于生成目标建议
 
         Returns:
             Tuple[bool, str]: (是否成功, 反馈消息)
-            - 成功时返回(True, 包含目标详情的成功消息)
+            - 成功时返回(True, 包含目标详情和AI建议的成功消息)
             - 失败时返回(False, 具体的错误提示)
 
         业务规则：
@@ -73,6 +75,7 @@ class GoalManager:
         2. 目标描述不能为空或只包含空白字符
         3. 计划天数必须在1-1000天之间
         4. 自动设置开始日期为今天，结束日期为开始日期+计划天数
+        5. AI会检查目标内容的适宜性并提供优化建议
 
         异常处理：
         - 数据库操作异常会被捕获并记录日志
@@ -94,6 +97,17 @@ class GoalManager:
             # 清理目标描述
             description = description.strip()
 
+            # AI检查目标内容的适宜性
+            ai_feedback = ""
+            if ai_generator:
+                try:
+                    # 生成AI检查和建议
+                    ai_suggestion = ai_generator.generate_goal_suggestion(description)
+                    ai_feedback = f"\n\n🤖 AI建议：\n{ai_suggestion}"
+                except Exception as e:
+                    logger.error(f"[Aspiration] AI建议生成失败: {e}")
+                    ai_feedback = "\n\n💡 建议：制定具体的执行计划会更有效哦！"
+
             # 创建新目标
             goal_id = self.db.create_goal(
                 user_id=user_id,
@@ -105,7 +119,7 @@ class GoalManager:
 
 📝 目标：{description}
 📅 计划：{planned_days}天
-🏁 开始日期：{date.today().strftime('%Y年%m月%d日')}
+🏁 开始日期：{date.today().strftime('%Y年%m月%d日')}{ai_feedback}
 
 加油！每一步都是进步，期待您的第一次打卡 💪
 

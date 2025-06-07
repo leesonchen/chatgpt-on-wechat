@@ -510,13 +510,8 @@ class AspirationPlugin(Plugin):
             # 清除会话状态
             self.user_sessions.pop(user_id, None)
 
-            # 创建目标
-            success, message = self.goal_manager.create_goal(user_id, description, days)
-
-            if success and self.ai_generator:
-                # 添加AI建议
-                suggestion = self.ai_generator.generate_goal_suggestion(description)
-                message += f"\n\n🤖 AI建议：\n{suggestion}"
+            # 创建目标，传入AI生成器用于生成建议
+            success, message = self.goal_manager.create_goal(user_id, description, days, self.ai_generator)
 
             return message
         else:
@@ -1088,13 +1083,8 @@ class AspirationPlugin(Plugin):
             # 清除会话状态
             self.user_sessions.pop(user_id, None)
 
-            # 创建目标
-            success, message = self.goal_manager.create_goal(user_id, description, days)
-
-            if success and self.ai_generator:
-                # 添加AI建议
-                suggestion = self.ai_generator.generate_goal_suggestion(description)
-                message += f"\n\n🤖 AI建议：\n{suggestion}"
+            # 创建目标，传入AI生成器用于生成建议
+            success, message = self.goal_manager.create_goal(user_id, description, days, self.ai_generator)
 
             return message
         else:

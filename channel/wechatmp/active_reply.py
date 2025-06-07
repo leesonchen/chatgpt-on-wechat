@@ -82,6 +82,11 @@ class Query:
                     if reply_text:
                         replyPost = create_reply(reply_text, msg)
                         return encrypt_func(replyPost.render())
+                elif msg.event == "click":
+                    # 处理菜单点击事件
+                    logger.info("[wechatmp] Received click event, key: {}".format(msg.key))
+                    channel.handle_click_event(msg)
+                    return "success"
                 else:
                     return "success"
             else:

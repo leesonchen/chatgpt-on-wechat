@@ -70,6 +70,9 @@ class WechatMPChannel(ChatChannel):
         asyncio.run_coroutine_threadsafe(self.handle_message(), self.backend_task_loop)
 
     def startup(self):
+        # 创建自定义菜单
+        self.create_menu()
+
         if self.passive_reply:
             urls = ("/wx", "channel.wechatmp.passive_reply.Query")
         else:
@@ -344,3 +347,92 @@ class WechatMPChannel(ChatChannel):
         if self.passive_reply:
             assert session_id not in self.cache_dict
             self.running.remove(session_id)
+
+    def create_menu(self):
+        """创建自定义菜单"""
+        try:
+            menu_data = {
+                "button": [
+                    {
+                        "type": "click",
+                        "name": "智能对话",
+                        "key": "CHAT_MODE"
+                    },
+                    {
+                        "name": "立志管理",
+                        "sub_button": [
+                            {
+                                "type": "click",
+                                "name": "立志",
+                                "key": "SET_GOAL"
+                            },
+                            {
+                                "type": "click",
+                                "name": "打卡",
+                                "key": "CHECK_IN"
+                            },
+                            {
+                                "type": "click",
+                                "name": "我的目标",
+                                "key": "MY_GOALS"
+                            },
+                            {
+                                "type": "click",
+                                "name": "目标统计",
+                                "key": "GOAL_STATS"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "帮助",
+                        "sub_button": [
+                            {
+                                "type": "click",
+                                "name": "使用说明",
+                                "key": "HELP"
+                            },
+                            {
+                                "type": "click",
+                                "name": "联系客服",
+                                "key": "CONTACT"
+                            }
+                        ]
+                    }
+                ]
+            }
+            result = self.client.menu.create(menu_data)
+            logger.info(f"[wechatmp] 创建自定义菜单成功: {result}")
+            return result
+        except Exception as e:
+            logger.error(f"[wechatmp] 创建自定义菜单失败: {e}")
+            return None
+
+    def handle_click_event(self, msg):
+        """处理菜单点击事件"""
+        event_key = msg.key
+        user_id = msg.source
+
+        logger.info(f"[wechatmp] Received click event: {event_key} from user: {user_id}")
+
+        # 构造上下文，模拟文本消息
+        context = Context()
+        context.type = ContextType.TEXT
+
+        # 根据不同的菜单项设置不同的内容
+        if event_key == "SET_GOAL":
+            context.content = "立志"
+        elif event_key == "CHECK_IN":
+            context.content = "打卡"
+        elif event_key == "MY_GOALS":
+            context.content = "我的目标"
+        elif event_key == "GOAL_STATS":
+            context.content = "目标统计"
+        else:
+            context.content = event_key  # 将事件key作为消息内容
+
+        context['session_id'] = user_id
+        context['receiver'] = user_id
+        context['msg'] = msg
+
+        # 发送到插件系统处理
+        self._handle(context)
