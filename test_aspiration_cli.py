@@ -17,6 +17,7 @@ import os
 import sys
 import json
 from datetime import date
+from config import load_config
 
 # 添加项目根目录到Python路径
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -37,6 +38,7 @@ class AspirationCLITester:
     """
 
     def __init__(self):
+        load_config()
         """初始化测试器"""
         # 使用测试数据库
         self.db_path = "test_aspiration_cli.db"

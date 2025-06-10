@@ -20,7 +20,7 @@ AI回复生成器模块
 """
 from typing import Dict, Any, Optional
 from bot.bot_factory import create_bot
-from bridge.context import Context
+from bridge.context import Context,ContextType
 from bridge.reply import Reply
 from common.log import logger
 from .ai_prompt_templates import AIPromptTemplates
@@ -91,6 +91,8 @@ class AIResponseGenerator:
             # 创建Context对象
             context = Context()
             context.content = prompt
+            context.type = ContextType.TEXT
+            context["session_id"] = "12345678"
 
             # 调用AI Bot生成回复
             response = self.bot.reply(prompt, context)
@@ -129,7 +131,9 @@ class AIResponseGenerator:
         try:
             context = Context()
             context.content = prompt
-
+            context.type = ContextType.TEXT
+            context["session_id"] = "12345678"
+            
             response = self.bot.reply(prompt, context)
 
             if response and hasattr(response, 'content') and response.content:
@@ -164,6 +168,8 @@ class AIResponseGenerator:
         try:
             context = Context()
             context.content = prompt
+            context.type = ContextType.TEXT
+            context["session_id"] = "12345678"
 
             response = self.bot.reply(prompt, context)
 

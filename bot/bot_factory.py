@@ -72,5 +72,10 @@ def create_bot(bot_type):
         from bot.modelscope.modelscope_bot import ModelScopeBot
         return ModelScopeBot()
 
+    print(f"不支持的bot类型: {bot_type}, 将使用默认OpenAI bot")
+    # raise RuntimeError(f"不支持的bot类型: {bot_type}")
+    # from bot.openai.open_ai_bot import OpenAIBot
+    # return OpenAIBot()
 
-    raise RuntimeError
+    from bot.chatgpt.chat_gpt_bot import ChatGPTBot
+    return ChatGPTBot()
