@@ -427,6 +427,10 @@ class WechatMPChannel(ChatChannel):
             context.content = "我的目标"
         elif event_key == "GOAL_STATS":
             context.content = "目标统计"
+        elif event_key == "HELP":
+            context.content = "使用说明"  # 或者提供具体的帮助内容
+        elif event_key == "CONTACT":
+            context.content = "联系客服"  # 或者提供具体的联系方式            
         else:
             context.content = event_key  # 将事件key作为消息内容
 

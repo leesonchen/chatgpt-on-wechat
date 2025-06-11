@@ -1,0 +1,33 @@
+{
+  "database_file": "data/timer.db",
+  "check_interval": 60,
+  "enable_ai_analysis": true,
+  "enable_reminders": true,
+  "max_timers_per_user": 50,
+  "default_delay_minutes": 15,
+  "cleanup_days": 30,
+  "reminder_settings": {
+    "max_delay_minutes": 1440,
+    "min_delay_minutes": 1,
+    "enable_smart_suggestions": true,
+    "enable_encouragement": true
+  },
+  "ai_settings": {
+    "enable_personalized_reminders": true,
+    "enable_intent_analysis": true,
+    "response_max_length": 500,
+    "fallback_to_templates": true
+  },
+  "scheduler_settings": {
+    "auto_start": true,
+    "thread_name": "TimerReminderScheduler",
+    "maintenance_hour": 2,
+    "error_retry_interval": 300
+  },
+  "message_settings": {
+    "include_emojis": true,
+    "include_action_hints": true,
+    "max_message_length": 1000
+  },
+  "debug": false
+}

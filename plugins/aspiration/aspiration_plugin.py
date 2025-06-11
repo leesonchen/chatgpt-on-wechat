@@ -265,9 +265,9 @@ class AspirationPlugin(Plugin):
         # 立志功能的关键词列表
         aspiration_keywords = [
             # 中文关键词
-            '立志', '目标', '打卡', '我的目标', '目标历史', '完成目标', '放弃目标',
+            '立志', '目标', '打卡', '我的目标', '目标历史', '完成目标', '放弃目标', '使用说明', '联系客服',
             # 英文关键词（备用）
-            'set_goal', 'check_in', 'my_goals', 'goal_stats', 'goal_history',
+            'set_goal', 'check_in', 'my_goals', 'goal_stats', 'goal_history', 'help', 'contact',
             # 快捷选项
             '1', '2', '3', '已完成', '部分完成', '未完成', 'done', 'partial', 'failed'
         ]
@@ -332,6 +332,20 @@ class AspirationPlugin(Plugin):
                 reply.content = self.goal_manager.get_goal_details(user_id)
             elif content in ['目标历史', 'GOAL_HISTORY']:
                 reply.content = self.goal_manager.get_goal_history(user_id)
+            elif content in ['使用说明', 'HELP']:
+                reply.content = '使用说明：\n' \
+                                '1. 输入「立志」开始设置新目标\n' \
+                                '2. 输入「打卡」开始打卡\n' \
+                                '3. 输入「我的目标」查看当前目标\n' \
+                                '4. 输入「目标统计」查看目标统计\n'
+                                    
+            elif content in ['联系客服', 'CONTACT']:
+                reply.content = '联系客服：\n' \
+                                '1. 微信：请添加客服微信号\n' \
+                                '2. 邮箱：support@example.com\n' \
+                                '3. QQ：请联系客服QQ\n' \
+                                '4. 电话：客服热线\n' \
+                                '5. 网址：官方网站\n'
 
             # 处理目标管理指令
             elif any(keyword in content_lower for keyword in ['完成目标', 'complete_goal']):
@@ -838,9 +852,9 @@ class AspirationPlugin(Plugin):
         # 立志功能的关键词列表
         aspiration_keywords = [
             # 中文关键词
-            '立志', '目标', '打卡', '我的目标', '目标历史', '完成目标', '放弃目标',
+            '立志', '目标', '打卡', '我的目标', '目标历史', '完成目标', '放弃目标', '使用说明', '联系客服',
             # 英文关键词（备用）
-            'set_goal', 'check_in', 'my_goals', 'goal_stats', 'goal_history',
+            'set_goal', 'check_in', 'my_goals', 'goal_stats', 'goal_history', 'help', 'contact',
             # 快捷选项
             '1', '2', '3', '已完成', '部分完成', '未完成', 'done', 'partial', 'failed'
         ]
